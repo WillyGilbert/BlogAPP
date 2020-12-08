@@ -1,0 +1,487 @@
+﻿@using Microsoft.AspNet.Identity;
+@using System.Collections.Generic;
+@using PagedList;
+@using PagedList.Mvc;
+
+@model IPagedList<BlogFinalProject.Models.Question>
+
+@{
+    ViewBag.Title = "Index";
+    bool LikeFound = false;
+    bool Voted = false;
+    bool Reacted = false;
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Order by Date", "Index", new { sortedByAnswer = false }, null) |
+    @Html.ActionLink("Order by Most answered ", "Index", new { sortedByAnswer = true }, null) |
+    @Html.ActionLink("New Question", "Create")  |
+    @Html.ActionLink("New Tag", "Create", "Tags")  |
+    @Html.ActionLink("Edit Tag", "Edit", "Tags")
+</p>
+<table class="table">
+    <tr>
+        <th>
+        </th>
+        <th>
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.First().Title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.First().Description)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.First().User)
+        </th>
+        <th>
+            Like
+        </th>
+        <th>
+        </th>
+    </tr>
+    @foreach (var question in Model)
+    {
+        <tr>
+            <td>
+                <i class="fa fa-plus icon" id="Icon"></i>
+            </td>
+            <td>
+                <i class="fa fa-comment" id="IconComment"></i>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => question.Title)
+            </td>
+            <td>
+                @Html.Raw(question.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => question.UserName)
+                @foreach (var item in @ViewBag.Reputations)
+                {
+                    if (item.UserId == question.UserId && item.NumberOfReactions > 0)
+                    {
+                        @Html.Raw(" | ");
+                        @item.NumberOfReactions;
+                        <i class="fa fa-star icon" id="Icon" style="color:goldenrod"></i>
+                        Reacted = true;
+                    }
+                }
+                @if (!Reacted && @ViewBag.Reputations != null)
+                {
+                    @Html.Raw(" | 0");
+                    <i class="fa fa-star icon" id="Icon" style="color:goldenrod"></i>
+                }
+                else
+                {
+                    Reacted = false;
+                }
+            </td>
+
+            <!-- Like in Questions -->
+
+            <td>
+                @if (question.UserId != User.Identity.GetUserId())
+                {
+                    if (ViewBag.Likes.Count > 0)
+                    {
+                        foreach (var like in ViewBag.Likes)
+                        {
+                            if (like.QuestionId == question.Id && like.Answer == null)
+                            {
+                                if (@like.IsLiked)
+                                {
+                                    @Html.ActionLink("Like", "Edit", "Likes", new { id = like.Id, QuestionId = question.Id }, null);
+                                }
+                                else
+                                {
+                                    @Html.ActionLink("DisLike", "Edit", "Likes", new { id = like.Id, QuestionId = question.Id }, null);
+                                }
+                                LikeFound = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        @Html.ActionLink("No Seleted", "Create", "Likes", new { QuestionId = question.Id }, null)
+                    }
+                    if (!LikeFound && (ViewBag.Likes.Count > 0))
+                    {
+                        @Html.ActionLink("No Seleted", "Create", "Likes", new { QuestionId = question.Id }, null)
+                    }
+                    else
+                    {
+                        LikeFound = false;
+                    }
+                }
+            </td>
+            <td>
+                @if (ViewBag.numberOfLikes.Count > 0)
+                {
+                    foreach (var like in ViewBag.numberOfLikes)
+                    {
+                        if (@like.QuestionId == question.Id)
+                        {
+                            @Html.Raw(@like.Count);
+                            Voted = true;
+                        }
+                    }
+                }
+
+                @if (!Voted)
+                {
+                    @Html.Raw("0");
+                }
+                else
+                {
+                    Voted = false;
+                }
+                <i class="fa fa-thumbs-up"></i>
+            </td>
+            <td>
+                @if (ViewBag.numberOfDisLikes != null)
+                {
+                    if (ViewBag.numberOfDisLikes.Count > 0)
+                    {
+                        foreach (var like in ViewBag.numberOfDisLikes)
+                        {
+                            if (@like.QuestionId == question.Id)
+                            {
+                                @Html.Raw(@like.Count);
+                                Voted = true;
+                            }
+                        }
+                    }
+                    if (!Voted)
+                    {
+                        @Html.Raw("0");
+                    }
+                    else
+                    {
+                        Voted = false;
+                    }
+                    <i class="fa fa-thumbs-down"></i>
+                }
+            </td>
+
+            @if (question.UserId == User.Identity.GetUserId())
+            {
+                <td>
+                    @Html.ActionLink("Answer", "Create", "Answers", new { QuestionId = question.Id }, null) |
+                    @Html.ActionLink("Comment", "Create", "Comments", new { QuestionId = question.Id, AnswerId = 0 }, null) |
+                    @Html.ActionLink("Edit", "Edit", new { id = question.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = question.Id })
+                </td>
+            }
+            else
+            {
+                <td>
+                    @Html.ActionLink("Answer", "Create", "Answers", new { QuestionId = question.Id }, null) |
+                    @Html.ActionLink("Comment", "Create", "Comments", new { QuestionId = question.Id, AnswerId = 0 }, null)
+                </td>
+            }
+        </tr>
+        <tr>
+            <td colspan="7">
+                @foreach (var item in @ViewBag.Tags)
+                {
+                    if (question.Id == item.QuestionId)
+                    {
+                        @Html.ActionLink((string)@item.Description + " | ", "IndexTags", "Questions", new { page = 1, TagId = (int)@item.TagId }, null);
+                    }
+                }
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+        <!-- Answers-->
+        <tbody id=@question.Id style="display:none">
+            @if (question.Answers.Count > 0)
+            {
+
+                <tr>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th></th>
+                </tr>
+                foreach (var answer in question.Answers)
+                {
+                    <tr style="color:mediumvioletred">
+                        <td colspan="2">
+                            Answer:
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => answer.Title)
+                        </td>
+                        <td>
+                            @Html.Raw(answer.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => answer.UserName)
+                        </td>
+
+
+
+                        <!-- Start Like Ans-->
+
+                        <td>
+                            @if (answer.UserId != User.Identity.GetUserId())
+                            {
+                                if (ViewBag.Likes.Count > 0)
+                                {
+                                    foreach (var like in ViewBag.Likes)
+                                    {
+                                        if (like.AnswerId == answer.Id)
+                                        {
+                                            if (@like.IsLiked)
+                                            {
+                                                @Html.ActionLink("Like", "Edit", "Likes", new { id = like.Id }, null);
+                                            }
+                                            else
+                                            {
+                                                @Html.ActionLink("DisLike", "Edit", "Likes", new { id = like.Id }, null);
+                                            }
+                                            LikeFound = true;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    @Html.ActionLink("No Seleted", "Create", "Likes", new { QuestionId = question.Id, AnswerId = answer.Id }, null)
+                                }
+                                if (!LikeFound && (ViewBag.Likes.Count > 0))
+                                {
+                                    @Html.ActionLink("No Seleted", "Create", "Likes", new { QuestionId = question.Id, AnswerId = answer.Id }, null)
+                                }
+                                else
+                                {
+                                    LikeFound = false;
+                                }
+                            }
+                        </td>
+                        <td>
+                            @if (ViewBag.numberOfLikesOnAnswer.Count > 0)
+                            {
+                                foreach (var like in ViewBag.numberOfLikesOnAnswer)
+                                {
+                                    if (@like.QuestionId == question.Id)
+                                    {
+                                        @Html.Raw(@like.Count);
+                                        Voted = true;
+                                    }
+                                }
+                            }
+
+                            @if (!Voted && (ViewBag.Likes.Count > 0))
+                            {
+                                @Html.Raw("0");
+                            }
+                            else
+                            {
+                                Voted = false;
+                            }
+                            <i class="fa fa-thumbs-up"></i>
+                        </td>
+                        <td>
+                            @if (ViewBag.numberOfDisLikesOnAnswer.Count > 0)
+                            {
+                                foreach (var like in ViewBag.numberOfDisLikesOnAnswer)
+                                {
+                                    if (@like.QuestionId == question.Id)
+                                    {
+                                        @Html.Raw(@like.Count);
+                                        Voted = true;
+                                    }
+                                }
+                            }
+                            @if (!Voted && (ViewBag.Likes.Count > 0))
+                            {
+                                @Html.Raw("0");
+                            }
+                            else
+                            {
+                                Voted = false;
+                            }
+                            <i class="fa fa-thumbs-down"></i>
+                        </td>
+
+                        <!-- End Like Ans-->
+                        @if (answer.UserId == User.Identity.GetUserId())
+                        {
+                            <td>
+                                @Html.ActionLink("Comment", "Create", "Comments", new { QuestionId = question.Id, AnswerId = answer.Id }, null) |
+                                @Html.ActionLink("Edit", "Edit", "Answers", new { id = answer.Id }, null) |
+                                @Html.ActionLink("Delete", "Delete", "Answers", new { id = answer.Id }, null)  |
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                @Html.ActionLink("Comment", "Create", "Comments", new { QuestionId = question.Id, AnswerId = answer.Id }, null)
+                            </td>
+                        }
+                        <!-- Accepted Answer -->
+                        @if (question.UserId == User.Identity.GetUserId())
+                        {
+                            <td>
+                                @Html.DisplayFor(modelItem => answer.AcceptedAnswer)
+                                @Html.ActionLink("Accepted ", "EditAcceptedAnswer", "Answers", new { id = answer.Id }, null)
+                            </td>
+                        }
+
+                    </tr>
+                    <!--Comment on Answers-->
+                    if (answer.Comments.Count > 0 && answer.Comments.ToList().Exists(e => e.AnswerId != null))
+                    {
+                        <tr>
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                            <th>
+                            </th>
+                            <th>
+                            </th>
+                            <td>
+                                @Html.DisplayNameFor(model => model.First().User)
+                            </td>
+                            <th>
+                            </th>
+                            <th>
+                            </th>
+                        </tr>
+                        foreach (var item in answer.Comments)
+                        {
+                            if (!(item.AnswerId == null))
+                            {
+                                <tr style="color:blue">
+                                    <th>
+                                    </th>
+                                    <td>
+                                    </td>
+                                    <td>
+                                        Comment Answer:
+                                    </td>
+                                    <td>
+                                        @Html.Raw(item.Description)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.UserName)
+                                    </td>
+                                    <td>
+                                    </td>
+                                    @if (item.UserId == User.Identity.GetUserId())
+                                    {
+                                        <td>
+                                            @Html.ActionLink("Edit", "Edit", "Comments", new { id = item.Id }, null) |
+                                            @Html.ActionLink("Details", "Details", "Comments", new { id = item.Id }, null) |
+                                            @Html.ActionLink("Delete", "Delete", "Comments", new { id = item.Id }, null)
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    }
+                }
+            }
+        </tbody>
+        <!-- Comment on Question-->
+        <tbody id=@question.Id style="display:none">
+            @if (question.Comments.ToList().Exists(e => e.AnswerId == null) && question.Comments.Count > 0)
+            {
+                <tr>
+                    <td>
+                    </td>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th></th>
+                </tr>
+                foreach (var item in question.Comments)
+                {
+                    if (item.AnswerId == null)
+                    {
+                        <tr style="color:blue">
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                            <td>
+                                Comments Question:
+                            </td>
+                            <td>
+                                @Html.Raw(item.Description)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.UserName)
+                            </td>
+                            <td>
+                            </td>
+                            @if (item.UserId == User.Identity.GetUserId())
+                            {
+                                <td>
+                                    @Html.ActionLink("Edit", "Edit", "Comments", new { id = item.Id }, null) |
+                                    @Html.ActionLink("Details", "Details", "Comments", new { id = item.Id }, null) |
+                                    @Html.ActionLink("Delete", "Delete", "Comments", new { id = item.Id }, null)
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    }
+
+</table>
+@Html.PagedListPager(Model, page => Url.Action("Index", new
+{
+    page,
+  searchBy = Request.QueryString["searchBy"],
+  search = Request.QueryString["search"],
+}))
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/App.js"></script>
+}

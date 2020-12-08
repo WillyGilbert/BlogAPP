@@ -1,0 +1,290 @@
+﻿@using Microsoft.AspNet.Identity;
+@using System.Collections.Generic;
+@using PagedList;
+@using PagedList.Mvc;
+
+@model IPagedList<BlogFinalProject.Models.Question>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("All Questions", "Index", "Questions", new { page = 1, TagId = 0 }, null) |
+    @Html.ActionLink("New Question", "Create")  |
+    @Html.ActionLink("New Tag", "Create", "Tags")  |
+    @Html.ActionLink("Edit Tag", "Edit", "Tags")
+</p>
+<table class="table">
+    <tr>
+        <th>
+        </th>
+        <th>
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.First().Title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.First().Description)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.First().User)
+        </th>
+        <th>
+            Like
+        </th>
+        <th>
+        </th>
+    </tr>
+    @foreach (var question in Model)
+    {
+        <tr>
+            <td>
+                <i class="fa fa-plus icon" id="Icon"></i>
+            </td>
+            <td>
+                <i class="fa fa-comment" id="IconComment"></i>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => question.Title)
+            </td>
+            <td>
+                @Html.Raw(question.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => question.UserName)
+            </td>
+            <td>
+                Like
+            </td>
+            @if (question.UserId == User.Identity.GetUserId())
+            {
+                <td>
+                    @Html.ActionLink("Answer", "Create", "Answers", new { QuestionId = question.Id }, null) |
+                    @Html.ActionLink("Comment", "Create", "Comments", new { QuestionId = question.Id, AnswerId = 0 }, null) |
+                    @Html.ActionLink("Edit", "Edit", new { id = question.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = question.Id })
+                </td>
+            }
+            else
+            {
+                <td>
+                    @Html.ActionLink("Answer", "Create", "Answers", new { QuestionId = question.Id }, null) |
+                    @Html.ActionLink("Comment", "Create", "Comments", new { QuestionId = question.Id, AnswerId = 0 }, null)
+                </td>
+            }
+        </tr>
+        <tr>
+            <td colspan="7">
+                @foreach (var item in @ViewBag.Tags)
+                {
+                    if (question.Id == item.QuestionId)
+                    {
+                        @Html.ActionLink((string)@item.Description + " | ", "IndexTags", "Questions", new { page = 1, TagId = (int)@item.TagId }, null);
+                    }
+                }
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+        <!-- Answers-->
+        <tbody id=@question.Id style="display:none">
+            @if (question.Answers.Count > 0)
+            {
+
+                <tr>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th></th>
+                </tr>
+                foreach (var answer in question.Answers)
+                {
+                    <tr style="color:mediumvioletred">
+                        <td colspan="2">
+                            Answer:
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => answer.Title)
+                        </td>
+                        <td>
+                            @Html.Raw(answer.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => answer.UserName)
+                        </td>
+                        <td>
+                            Like
+                        </td>
+                        @if (answer.UserId == User.Identity.GetUserId())
+                        {
+                            <td>
+                                @Html.ActionLink("Comment", "Create", "Comments", new { QuestionId = question.Id, AnswerId = answer.Id }, null) |
+                                @Html.ActionLink("Edit", "Edit", "Answers", new { id = answer.Id }, null) |
+                                @Html.ActionLink("Delete", "Delete", "Answers", new { id = answer.Id }, null)
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                @Html.ActionLink("Comment", "Create", "Comments", new { QuestionId = question.Id, AnswerId = answer.Id }, null)
+                            </td>
+                        }
+                        <td>
+                            @Html.DisplayFor(modelItem => answer.AcceptedAnswer)
+                        </td>
+                    </tr>
+                    <!--Comment on Answers-->
+                    if (answer.Comments.Count > 0 && answer.Comments.ToList().Exists(e => e.AnswerId != null))
+                    {
+                        <tr>
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                            <th>
+                            </th>
+                            <th>
+                            </th>
+                            <td>
+                                @Html.DisplayNameFor(model => model.First().User)
+                            </td>
+                            <th>
+                            </th>
+                            <th>
+                            </th>
+                        </tr>
+                        foreach (var item in answer.Comments)
+                        {
+                            if (!(item.AnswerId == null))
+                            {
+                                <tr style="color:blue">
+                                    <th>
+                                    </th>
+                                    <td>
+                                    </td>
+                                    <td>
+                                        Comment Answer:
+                                    </td>
+                                    <td>
+                                        @Html.Raw(item.Description)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.UserName)
+                                    </td>
+                                    <td>
+                                    </td>
+                                    @if (item.UserId == User.Identity.GetUserId())
+                                    {
+                                        <td>
+                                            @Html.ActionLink("Edit", "Edit", "Comments", new { id = item.Id }, null) |
+                                            @Html.ActionLink("Details", "Details", "Comments", new { id = item.Id }, null) |
+                                            @Html.ActionLink("Delete", "Delete", "Comments", new { id = item.Id }, null)
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    }
+                }
+            }
+        </tbody>
+        <!-- Comment on Question-->
+        <tbody id=@question.Id style="display:none">
+            @if (question.Comments.ToList().Exists(e => e.AnswerId == null) && question.Comments.Count > 0)
+            {
+                <tr>
+                    <td>
+                    </td>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th></th>
+                </tr>
+                foreach (var item in question.Comments)
+                {
+                    if (item.AnswerId == null)
+                    {
+                        <tr style="color:blue">
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                            <td>
+                                Comments Question:
+                            </td>
+                            <td>
+                                @Html.Raw(item.Description)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.UserName)
+                            </td>
+                            <td>
+                            </td>
+                            @if (item.UserId == User.Identity.GetUserId())
+                            {
+                                <td>
+                                    @Html.ActionLink("Edit", "Edit", "Comments", new { id = item.Id }, null) |
+                                    @Html.ActionLink("Details", "Details", "Comments", new { id = item.Id }, null) |
+                                    @Html.ActionLink("Delete", "Delete", "Comments", new { id = item.Id }, null)
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    }
+
+</table>
+@Html.PagedListPager(Model, page => Url.Action("Index", new
+{
+    page,
+  searchBy = Request.QueryString["searchBy"],
+  search = Request.QueryString["search"],
+}))
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/App.js"></script>
+}
