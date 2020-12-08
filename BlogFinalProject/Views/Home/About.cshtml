@@ -2,6 +2,26 @@
     ViewBag.Title = "About";
 }
 <h2>@ViewBag.Title.</h2>
-<h3>@ViewBag.Message</h3>
+<h3>BlogAPP</h3>
+<p>
+    BlogAPP (Question and Answer) is a website similar to StackOverflow, where users can ask and answer questions regarding a certain topic.
+    I used EF Code First approach, which includes creating Users' accounts and Roles. Those users can log in/log off.
+    The system includes the following:
+    <ol>
+        <li>The main page with a list of recent questions, every 10 questions appear together (pagination).</li>
+        <li>Users can post a question.</li>
+        <li>Description field has a rich text editor.</li>
+        <li>Users can answer a question.</li>
+        <li>Each question has a list of tags, when users click on a tag, they can direct to a page containing all the questions related to this tag.</li>
+        <li>Each question page starts with the title of the question, the body (description), the tags, then a list of answers, Users can also comment on questions and answers.</li>
+        <li>Users can sort the questions based on:</li>
+        <ul>
+            <li>Newest first</li>
+            <li>Most answered first</li>
+        </ul>
+        <li>Each question and answer can have several votes, where users can either upvote or downvote them, users can’t vote on their own questions and answers.</li>
+        <li>Each user has a reputation that appears next to their name, each time a user gets an upvote they get 5 reputations, a downvote removes 5 reputations.</li>
+        <li>The user who asked the question can mark an answer as the accepted answer.</li>
 
-<p>Use this area to provide additional information.</p>
+    </ol>
+</p>
